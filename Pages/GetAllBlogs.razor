@@ -1,0 +1,54 @@
+﻿@page "/all-blogs"
+@using ColonyReviewsBlazor8.Models
+@using ColonyReviewsBlazor8.Services
+@inject IGetAllBlogsService GetAllBlogsService
+
+@attribute [StreamRendering(true)]
+
+<PageTitle>Blogs</PageTitle>
+
+@if (allBlogs == null)
+{
+    <div class="text-center mt-5">
+        <span class="spinner-border" role="status"></span>
+        <p class="mt-2">Loading blogs....</p>
+    </div>
+}
+else
+{
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        @foreach (var blog in allBlogs)
+        {
+            <div class="col">
+                <div class="card h-100">
+                    @if (blog.ImageData != null && blog.ImageType != null)
+                    {
+                        <img src="@($"data:{blog.ImageType};base64,{Convert.ToBase64String(blog.ImageData)}")" class="card-img-top" alt="Blog Image">
+                    }
+                    <div class="card-body">
+                        <h5 class="card-title">@blog.Title</h5>
+                        <p class="card-text">@blog.Content</p>
+                    </div>
+                    <div class="card-footer">
+                        <small class="text-muted">Author: @blog.Author</small>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    private static List<BlogModel>? allBlogs;
+    private static bool isDataLoaded = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!isDataLoaded)
+        {
+            await GetAllBlogsService.LoadDataAsync();
+            allBlogs = GetAllBlogsService.GetData();
+            isDataLoaded = true;
+        }
+    }
+}
